@@ -23,12 +23,29 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+# custom functions
+
+def save_message():
+	# save to db
+	pass
+
+def detect_keywords(string):
+	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند ', 'پکیج رزومه ', 'fellowship', 'scholarship ', 'کانال اپلای', 'نمرات تافل ایلتس مورد نیاز امریکا', 'ایمیل زدن', 'ایمیل', 'ویزای EB1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'نحوه اخذ کمک هزینه فوق لیسانس دکتری', 'GRE', 'GPA', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل Gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای EB1', 'دیتابیس', 'Cover letter', 'فاکتور پذیرش', 'GPA Calculator', 'توضیح فاندها', 'TPO', 'GMAT']
+	# keywords = ['gmat','gre']
+	decoded_string = string.decode('utf-8')
+	found_keywords = []
+	for key in keywords:
+		if key.decode('utf-8') in decoded_string:
+			found_keywords.append(key)
+	# aString = string.split()
+	# return list(set(aString) & set(keywords))
+	return found_keywords
+
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     update.message.reply_text('Hi!')
-
 
 def help(bot, update):
     update.message.reply_text('Help!')
@@ -42,7 +59,8 @@ def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 def base_logic(bot, update):
-	update.message.reply_text(update.message.text)
+	msg_keywords = detect_keywords(update.message.text)
+	update.message.reply_text(msg_keywords)
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
 		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
