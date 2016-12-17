@@ -43,9 +43,9 @@ def error(bot, update, error):
 
 def base_logic(bot, update):
 	update.message.reply_text(update.message.text)
-	if 'soal' in message.text:
+	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
-		bot.sendMessage(chat_id: update.message.message_id, text: 'soal added')
+		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
 
 
 def main():
