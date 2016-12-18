@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Simple Bot to reply to Telegram messages
-# This program is dedicated to the public domain under the CC0 license.
-# """
-# This Bot uses the Updater class to handle the bot.
-# First, a few handler functions are defined. Then, those functions are passed to
-# the Dispatcher and registered at their respective places.
-# Then, the bot is started and runs until we press Ctrl-C on the command line.
-# Usage:
-# Basic Echobot example, repeats messages.
-# Press Ctrl-C on the command line or send a signal to the process to stop the
-# bot.
-# """
 
+from __future__ import unicode_literals
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
+
+## to make it utf8
+# import sys
+# reload(sys)
+# sys.setdefaultencoding('utf-8')
+
+#hazm
+from hazm import *
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,15 +27,17 @@ def save_message():
 
 def detect_keywords(string):
 	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند ', 'پکیج رزومه ', 'fellowship', 'scholarship ', 'کانال اپلای', 'نمرات تافل ایلتس مورد نیاز امریکا', 'ایمیل زدن', 'ایمیل', 'ویزای EB1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'نحوه اخذ کمک هزینه فوق لیسانس دکتری', 'GRE', 'GPA', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل Gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای EB1', 'دیتابیس', 'Cover letter', 'فاکتور پذیرش', 'GPA Calculator', 'توضیح فاندها', 'TPO', 'GMAT']
-	# keywords = ['gmat','gre']
-	decoded_string = string.decode('utf-8')
+	normalizer = Normalizer()   
+	msg = normalizer.normalize(string)
 	found_keywords = []
 	for key in keywords:
-		if key.decode('utf-8') in decoded_string:
+		if key in msg:
 			found_keywords.append(key)
 	# aString = string.split()
 	# return list(set(aString) & set(keywords))
 	return found_keywords
+
+
 
 
 # Define a few command handlers. These usually take the two arguments bot and
@@ -60,7 +58,8 @@ def error(bot, update, error):
 
 def base_logic(bot, update):
 	msg_keywords = detect_keywords(update.message.text)
-	update.message.reply_text(msg_keywords)
+	update.message.reply_text(str(msg_keywords).strip('[]'))
+	bot.sendMessage(chat_id= update.message.chat.id, text= str(msg_keywords).strip('[]'))
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
 		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
