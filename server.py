@@ -6,12 +6,25 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 
 ## to make it utf-8
-import sys
+import sys, sqlite3, os
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #hazm
 from hazm import *
+
+# felan send messages to the group
+test_group_chat_id = -195462829
+
+#prep db
+if not (os.path.exists('faq.db')):
+	conn = sqlite3.connect('faq.db')
+	c = conn.cursor()
+	# Create table
+	c.execute('''CREATE TABLE messages
+	             (id INTEGER PRIMARY KEY, body TEXT)''')
+
+# end of init
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,10 +32,16 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-# custom functions
+# custom functions start here
 
-def save_message():
+def save_message(string):
 	# save to db
+	# is it okay to call connect every time?! TODO
+	conn = sqlite3.connect('faq.db')
+	c = conn.cursor()
+	c.execute("INSERT INTO messages VALUES (null,'{0}')".format(string))
+	conn.commit()
+	print 'saved' + string
 	pass
 
 def detect_keywords(string):
@@ -47,7 +66,7 @@ def detect_keywords(string):
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     update.message.reply_text('Hi!')
-    update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
+    # update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 def help(bot, update):
     update.message.reply_text('Help!')
@@ -66,10 +85,12 @@ def base_logic(bot, update):
 	msg = ''
 	for key, value in detected_keywords.iteritems():
 		msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
-	update.message.reply_text(msg)
+	if len(msg) > 1:
+		bot.sendMessage(chat_id= test_group_chat_id, text= msg)
+
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
-		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
+		save_message(update.message.text)
 
 
 def main():
