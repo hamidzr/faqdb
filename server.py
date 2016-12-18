@@ -57,8 +57,10 @@ def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 def base_logic(bot, update):
-	msg_keywords = detect_keywords(update.message.text)
-	update.message.reply_text(str(msg_keywords).strip('[]'))
+	detected_keywords = detect_keywords(update.message.text)
+	msg_keywords = str(detected_keywords).strip('[]')
+	update.message.reply_text(msg_keywords)
+	print msg_keywords
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
 		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
