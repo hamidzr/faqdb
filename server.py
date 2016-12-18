@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 
-## to make it utf8
+## to make it utf-8
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -26,13 +26,16 @@ def save_message():
 	pass
 
 def detect_keywords(string):
-	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند ', 'پکیج رزومه ', 'fellowship', 'scholarship ', 'کانال اپلای', 'نمرات تافل ایلتس مورد نیاز امریکا', 'ایمیل زدن', 'ایمیل', 'ویزای EB1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'نحوه اخذ کمک هزینه فوق لیسانس دکتری', 'GRE', 'GPA', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل Gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای EB1', 'دیتابیس', 'Cover letter', 'فاکتور پذیرش', 'GPA Calculator', 'توضیح فاندها', 'TPO', 'GMAT']
-	normalizer = Normalizer()   
-	msg = normalizer.normalize(string)
-	found_keywords = []
+	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند', 'پکیج رزومه', 'fellowship', 'scholarship', 'کانال اپلای', 'تافل', 'ایلتس', 'امریکا', 'ایمیل', 'ویزای eb1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'فوق لیسانس', 'دکتری', 'کمک هزینه', 'gre', 'gpa', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای eb1', 'دیتابیس', 'cover letter', 'فاکتور پذیرش', 'gpa calculator', 'توضیح فاندها', 'tpo', 'gmat', 'پذيرش', 'فاند', 'بورسيه', 'ارشد', 'دكترا', 'آمريكا', 'كانادا', 'اروپا', 'استراليا', 'اقامت', 'مهاجرت', 'آلمان', 'ايتاليا', 'مكاتبه', 'ادامه تحصيل', 'توصيه نامه', 'عنوان ايميل به استاد', ' حداقل معدل', 'انگیزه نامه', 'sop']
+	# normalizer = Normalizer()   
+	# msg = normalizer.normalize(string)
+	# found_keywords = ''
+	found_keywords = {}
 	for key in keywords:
-		if key in msg:
-			found_keywords.append(key)
+		rep = string.count(key)
+		if rep > 0 :
+			# found_keywords += "#{0} ".format(key.replace (" ", "_"))
+			found_keywords[key]= rep
 	# aString = string.split()
 	# return list(set(aString) & set(keywords))
 	return found_keywords
@@ -44,6 +47,7 @@ def detect_keywords(string):
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     update.message.reply_text('Hi!')
+    update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 def help(bot, update):
     update.message.reply_text('Help!')
@@ -58,9 +62,11 @@ def error(bot, update, error):
 
 def base_logic(bot, update):
 	detected_keywords = detect_keywords(update.message.text)
-	msg_keywords = str(detected_keywords).strip('[]')
-	update.message.reply_text(msg_keywords)
-	print msg_keywords
+	# msg_keywords = str(detected_keywords).strip('[]')
+	msg = ''
+	for key, value in detected_keywords.iteritems():
+		msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
+	update.message.reply_text(msg)
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
 		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
