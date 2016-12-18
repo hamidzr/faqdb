@@ -6,9 +6,9 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 
 ## to make it utf8
-# import sys
-# reload(sys)
-# sys.setdefaultencoding('utf-8')
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 #hazm
 from hazm import *
@@ -59,7 +59,6 @@ def error(bot, update, error):
 def base_logic(bot, update):
 	msg_keywords = detect_keywords(update.message.text)
 	update.message.reply_text(str(msg_keywords).strip('[]'))
-	bot.sendMessage(chat_id= update.message.chat.id, text= str(msg_keywords).strip('[]'))
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
 		bot.sendMessage(chat_id= update.message.chat.id, text= 'soal added')
