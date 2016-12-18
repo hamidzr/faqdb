@@ -22,7 +22,11 @@ if not (os.path.exists('faq.db')):
 	c = conn.cursor()
 	# Create table
 	c.execute('''CREATE TABLE messages
-	             (id INTEGER PRIMARY KEY, body TEXT)''')
+	             (id INTEGER PRIMARY KEY, body TEXT, chat_id INTEGER, message_id INTEGER)''')
+	c.execute('''CREATE TABLE keywords
+	             (id INTEGER PRIMARY KEY, name VARCHAR(100))''')
+	c.execute('''CREATE TABLE keywords_messages_association
+	             (keywords_id INTEGER, message_id INTEGER, count INTEGER)''')
 
 # end of init
 
@@ -34,14 +38,14 @@ logger = logging.getLogger(__name__)
 
 # custom functions start here
 
-def save_message(string):
+def save_message(message):
 	# save to db
 	# is it okay to call connect every time?! TODO
 	conn = sqlite3.connect('faq.db')
 	c = conn.cursor()
-	c.execute("INSERT INTO messages VALUES (null,'{0}')".format(string))
+	c.execute("INSERT INTO messages VALUES (null,'{0}','{1}','{2}')".format(message.text, message.chat.id, message.message_id))
 	conn.commit()
-	print 'saved' + string
+	print 'saved' + message.text
 	pass
 
 def detect_keywords(string):
@@ -82,15 +86,16 @@ def error(bot, update, error):
 def base_logic(bot, update):
 	detected_keywords = detect_keywords(update.message.text)
 	# msg_keywords = str(detected_keywords).strip('[]')
-	msg = ''
-	for key, value in detected_keywords.iteritems():
-		msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
-	if len(msg) > 1:
-		bot.sendMessage(chat_id= test_group_chat_id, text= msg)
-
+	
+	if len(detected_keywords) > 1:
+		msg = ''
+		for key, value in detected_keywords.iteritems():
+			msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
+			bot.sendMessage(chat_id= test_group_chat_id, text= msg)
+			save_message(update.message)
+	
 	if 'soal' in update.message.text:
 		update.message.reply_text('soal porside shod!')
-		save_message(update.message.text)
 
 
 def main():
