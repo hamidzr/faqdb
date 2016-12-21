@@ -72,7 +72,7 @@ def start(bot, update):
     # update.message.reply_text('Hi!')
     # update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
-def help(bot, update):
+# def help(bot, update):
     # update.message.reply_text('Help!')
 
 
