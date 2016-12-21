@@ -69,15 +69,15 @@ def detect_keywords(string):
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
-    update.message.reply_text('Hi!')
+    # update.message.reply_text('Hi!')
     # update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 def help(bot, update):
-    update.message.reply_text('Help!')
+    # update.message.reply_text('Help!')
 
 
-def echo(bot, update):
-    update.message.reply_text(update.message.text)
+# def echo(bot, update):
+    # update.message.reply_text(update.message.text)
 
 
 def error(bot, update, error):
@@ -95,7 +95,7 @@ def base_logic(bot, update):
 			save_message(update.message)
 	
 	if 'soal' in update.message.text:
-		update.message.reply_text('soal porside shod!')
+		# update.message.reply_text('soal porside shod!')
 
 
 def main():
