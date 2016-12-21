@@ -11,7 +11,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #hazm
-from hazm import *
+# from hazm import *
 
 # felan send messages to the group
 test_group_chat_id = -195462829
@@ -46,7 +46,6 @@ def save_message(message):
 	c.execute("INSERT INTO messages VALUES (null,'{0}','{1}','{2}')".format(message.text, message.chat.id, message.message_id))
 	conn.commit()
 	print 'saved' + message.text
-	pass
 
 def detect_keywords(string):
 	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند', 'پکیج رزومه', 'fellowship', 'scholarship', 'کانال اپلای', 'تافل', 'ایلتس', 'امریکا', 'ایمیل', 'ویزای eb1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'فوق لیسانس', 'دکتری', 'کمک هزینه', 'gre', 'gpa', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای eb1', 'دیتابیس', 'cover letter', 'فاکتور پذیرش', 'gpa calculator', 'توضیح فاندها', 'tpo', 'gmat', 'پذيرش', 'فاند', 'بورسيه', 'ارشد', 'دكترا', 'آمريكا', 'كانادا', 'اروپا', 'استراليا', 'اقامت', 'مهاجرت', 'آلمان', 'ايتاليا', 'مكاتبه', 'ادامه تحصيل', 'توصيه نامه', 'عنوان ايميل به استاد', ' حداقل معدل', 'انگیزه نامه', 'sop']
@@ -68,9 +67,9 @@ def detect_keywords(string):
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-# def start(bot, update):
-    # update.message.reply_text('Hi!')
-    # update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
+def start(bot, update):
+    update.message.reply_text('Hi!')
+#     update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 # def help(bot, update):
     # update.message.reply_text('Help!')
@@ -100,28 +99,28 @@ def base_logic(bot, update):
 
 def main():
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater("244680876:AAHJYczo4r_RmC20LsRr7_BMFNgGRm_UB3k")
+	updater = Updater("244680876:AAHJYczo4r_RmC20LsRr7_BMFNgGRm_UB3k")
 
     # Get the dispatcher to register handlers
-    dp = updater.dispatcher
+	dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-#     dp.add_handler(CommandHandler("start", start))
+	dp.add_handler(CommandHandler("start", start))
 #     dp.add_handler(CommandHandler("help", help))
 
     # base logic
-    dp.add_handler(MessageHandler(Filters.text, base_logic))
+	dp.add_handler(MessageHandler(Filters.text, base_logic))
 
     # log all errors
-    dp.add_error_handler(error)
+	dp.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
+	updater.start_polling()
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+	updater.idle()
 
 
 if __name__ == '__main__':
