@@ -86,12 +86,13 @@ def base_logic(bot, update):
 	detected_keywords = detect_keywords(update.message.text)
 	# msg_keywords = str(detected_keywords).strip('[]')
 	
-	if len(detected_keywords) > 1:
+	if len(detected_keywords) > 0:
 		msg = ''
 		for key, value in detected_keywords.iteritems():
 			msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
-			bot.sendMessage(chat_id= test_group_chat_id, text= msg)
-			save_message(update.message)
+		bot.sendMessage(chat_id= test_group_chat_id, text= 'detected from chat: ' + update.message.chat.title)
+		bot.sendMessage(chat_id= test_group_chat_id, text= msg)
+		save_message(update.message)
 	
 # 	if 'soal' in update.message.text:
 		# update.message.reply_text('soal porside shod!')
