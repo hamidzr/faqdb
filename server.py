@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
+from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,ConversationHandler)
 import logging
 
 ## to make it utf-8
@@ -43,6 +44,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+# GENDER = range(4)
 
 # custom functions start here
 
@@ -70,7 +72,7 @@ update_keywords()
 
 
 def detect_keywords(string):
-	# keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند', 'پکیج رزومه', 'fellowship', 'scholarship', 'کانال اپلای', 'تافل', 'ایلتس', 'امریکا', 'ایمیل', 'ویزای eb1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'فوق لیسانس', 'دکتری', 'کمک هزینه', 'gre', 'gpa', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای eb1', 'دیتابیس', 'cover letter', 'فاکتور پذیرش', 'gpa calculator', 'توضیح فاندها', 'tpo', 'gmat', 'پذيرش', 'فاند', 'بورسيه', 'ارشد', 'دكترا', 'آمريكا', 'كانادا', 'اروپا', 'استراليا', 'اقامت', 'مهاجرت', 'آلمان', 'ايتاليا', 'مكاتبه', 'ادامه تحصيل', 'توصيه نامه', 'عنوان ايميل به استاد', ' حداقل معدل', 'انگیزه نامه', 'sop']
+	
 	# normalizer = Normalizer()   
 	# msg = normalizer.normalize(string)
 	# found_keywords = ''
@@ -89,16 +91,58 @@ def detect_keywords(string):
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
+
 def start(bot, update):
     update.message.reply_text('Hi!')
+    username = update.message.from_user.username 
+    update.message.reply_text(update.message.text + username)
 #     update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 # def help(bot, update):
     # update.message.reply_text('Help!')
 
+def addKeyword(bot, update):
+	update.message.from_user.username
+	msg = update.message.text.split()
+	del msg[0]
+	key = ' '.join(msg)
+	update.message.reply_text('keyword ' + key + ' ..')
+	conn = sqlite3.connect('faq.db')
+	c = conn.cursor()
+	c.execute("INSERT INTO keywords VALUES (null, '{0}')".format(key))
+	conn.commit()
+	update_keywords()
 
 # def echo(bot, update):
     # update.message.reply_text(update.message.text)
+
+# def keyword(bot, update):
+#     reply_keyboard = [['Boy', 'Girl', 'Other']]
+
+#     update.message.reply_text(
+#         'Hi! My name is Professor Bot. I will hold a conversation with you. '
+#         'Send /cancel to stop talking to me.\n\n'
+#         'Are you a boy or a girl?',
+#         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
+#     return GENDER
+
+
+# def gender(bot, update):
+#     user = update.message.from_user
+#     logger.info("Gender of %s: %s" % (user.first_name, update.message.text))
+#     update.message.reply_text('I see! Please send me a photo of yourself, '
+#                               'so I know what you look like, or send /skip if you don\'t want to.',
+#                               reply_markup=ReplyKeyboardRemove())
+
+#     return ConversationHandler.END
+
+# def cancel(bot, update):
+#     user = update.message.from_user
+#     logger.info("User %s canceled the conversation." % user.first_name)
+#     update.message.reply_text('Bye! I hope we can talk again some day.',
+#                               reply_markup=ReplyKeyboardRemove())
+#     return ConversationHandler.END
 
 
 def error(bot, update, error):
@@ -129,7 +173,21 @@ def main():
 
     # on different commands - answer in Telegram
 	dp.add_handler(CommandHandler("start", start))
+	dp.add_handler(CommandHandler("addKeyword", addKeyword))
 #     dp.add_handler(CommandHandler("help", help))
+
+ #    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
+	# conv_handler = ConversationHandler(
+	# 	entry_points=[CommandHandler('keyword', keyword)],
+	# 	states={
+	#   		GENDER: [MessageHandler(Filters.text, gender)]
+	# 	},
+	# 	fallbacks=[CommandHandler('cancel', cancel)]
+	# )
+
+	# dp.add_handler(conv_handler)
+
+
 
     # base logic
 	dp.add_handler(MessageHandler(Filters.text, base_logic))
