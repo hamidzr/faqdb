@@ -18,31 +18,58 @@ sys.setdefaultencoding('utf-8')
 test_group_chat_id = -195462829
 
 
-#prep db
-if not (os.path.exists('faq.db')):
-	conn = sqlite3.connect('faq.db')
-	c = conn.cursor()
-	# Create table
-	c.execute('''CREATE TABLE messages
-	             (id INTEGER PRIMARY KEY, body TEXT, chat_id INTEGER, message_id INTEGER)''')
-	c.execute('''CREATE TABLE keywords
-	             (id INTEGER PRIMARY KEY, name VARCHAR(100))''')
-	c.execute('''CREATE TABLE keywords_messages_association
-	             (keywords_id INTEGER, message_id INTEGER, count INTEGER)''')
-	
-	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند', 'پکیج رزومه', 'fellowship', 'scholarship', 'کانال اپلای', 'تافل', 'ایلتس', 'امریکا', 'ایمیل', 'ویزای eb1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'فوق لیسانس', 'دکتری', 'کمک هزینه', 'gre', 'gpa', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای eb1', 'دیتابیس', 'cover letter', 'فاکتور پذیرش', 'gpa calculator', 'توضیح فاندها', 'tpo', 'gmat', 'پذيرش', 'فاند', 'بورسيه', 'ارشد', 'دكترا', 'آمريكا', 'كانادا', 'اروپا', 'استراليا', 'اقامت', 'مهاجرت', 'آلمان', 'ايتاليا', 'مكاتبه', 'ادامه تحصيل', 'توصيه نامه', 'عنوان ايميل به استاد', ' حداقل معدل', 'انگیزه نامه', 'sop']
+#init db
+from sqlite3 import dbapi2 as sqlite
+from sqlalchemy import create_engine
 
+engine = create_engine('sqlite+pysqlite:///test.db', module=sqlite, connect_args={'check_same_thread': False},)
+# engine = create_engine('sqlalchemy.db', echo=True)
+
+#create session
+from sqlalchemy.orm import sessionmaker
+Session = sessionmaker(bind=engine)
+
+#base class
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+# end init db
+
+#define classes
+from sqlalchemy import Column, Integer, String
+
+class Message(Base):
+	__tablename__ = 'messages'
+	id = Column(Integer, primary_key=True)
+	body = Column(String)
+	chat_id = Column(Integer)
+	message_id = Column(Integer)
+
+class Keyword(Base):
+	__tablename__ = 'keywords'
+	id = Column(Integer, primary_key=True)
+	name = Column(String)
+
+#create all tables /db
+Base.metadata.create_all(engine)
+
+
+#start a session? 
+session = Session()
+
+
+if len(session.query(Keyword).all()) < 5:
+	#seed db
+	keywords = ['آزادسازی مدرک', 'ایتالیا', 'اسکالرشیپ', 'فلوشیپ', 'فاند', 'پکیج رزومه', 'fellowship', 'scholarship', 'کانال اپلای', 'تافل', 'ایلتس', 'امریکا', 'ایمیل', 'ویزای eb1', 'انواع بورس', 'اطلاعات دانشگاه', 'زمانبدی پذیرش', 'فوق لیسانس', 'دکتری', 'کمک هزینه', 'gre', 'gpa', 'نتایج اپلای', 'اساتید امریکا', 'رشته حساس', 'زمانبدی پذیرش', 'آزادسازی مدرک', 'ranking', 'انواع بورس', 'بحث داغ', 'زبان غذا', 'مصاحبه', 'ایمیل زدن', 'کسری خدمت', 'مطالب مفید', 'wes org', 'تبدیل نمره ایران به آمریکا', 'ردگیری ایمیل ها', 'نتیجه نتایج پذیرش آمریکا', 'تهیه متن آماده جهت تسریع ایمیل gmail', 'اقامت دائم کاری استرالیا', 'فاند هزینه', 'مدارک کاریابی', 'تبدیل معدل', 'ویزای eb1', 'دیتابیس', 'cover letter', 'فاکتور پذیرش', 'gpa calculator', 'توضیح فاندها', 'tpo', 'gmat', 'پذيرش', 'فاند', 'بورسيه', 'ارشد', 'دكترا', 'آمريكا', 'كانادا', 'اروپا', 'استراليا', 'اقامت', 'مهاجرت', 'آلمان', 'ايتاليا', 'مكاتبه', 'ادامه تحصيل', 'توصيه نامه', 'عنوان ايميل به استاد', ' حداقل معدل', 'انگیزه نامه', 'sop']
 	for key in keywords:
-		c.execute("INSERT INTO keywords VALUES (null, '{0}')".format(key))
-	conn.commit()
-	print 'seeding done'
+		keyw = Keyword(name=key)
+		session.add(keyw)
+	session.commit()
 
 # end of init
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 # GENDER = range(4)
 
@@ -51,23 +78,16 @@ logger = logging.getLogger(__name__)
 keywords = []
 
 def save_message(message):
-	# save to db
-	# is it okay to call connect every time?! TODO
-	conn = sqlite3.connect('faq.db')
-	c = conn.cursor()
-	c.execute("INSERT INTO messages VALUES (null,'{0}','{1}','{2}')".format(message.text, message.chat.id, message.message_id))
-	conn.commit()
-	print 'saved' + message.text
+	# save to db\
+	session.add(Message(body=message.text, chat_id=message.chat.id, message_id=message.message_id))
+	session.commit()
 
 
 def update_keywords():
 	global keywords
-	conn = sqlite3.connect('faq.db')
-	c = conn.cursor()
-	c.execute("select name from keywords")
-	for row in c.fetchall():
-		keywords.append(row[0])
-	print keywords
+	for key in session.query(Keyword).all():
+		keywords.append(key.name)
+
 update_keywords()
 
 
@@ -93,10 +113,9 @@ def detect_keywords(string):
 # update. Error handlers also receive the raised TelegramError object in error.
 
 def start(bot, update):
-    update.message.reply_text('Hi!')
+    update.message.reply_text('Started!')
     username = update.message.from_user.username 
     update.message.reply_text(update.message.text + username)
-#     update.message.reply_text(str([u'\u0641\u0644\u0648\u0634\u06cc\u067e', u'\u0627\u06cc\u0645\u06cc\u0644', u'GPA']))
 
 # def help(bot, update):
     # update.message.reply_text('Help!')
@@ -106,15 +125,10 @@ def addKeyword(bot, update):
 	msg = update.message.text.split()
 	del msg[0]
 	key = ' '.join(msg)
-	update.message.reply_text('keyword ' + key + ' ..')
-	conn = sqlite3.connect('faq.db')
-	c = conn.cursor()
-	c.execute("INSERT INTO keywords VALUES (null, '{0}')".format(key))
-	conn.commit()
-	update_keywords()
-
-# def echo(bot, update):
-    # update.message.reply_text(update.message.text)
+	if len(key) > 2:
+		session.add(Keyword(name=key))
+		update.message.reply_text('keyword "' + key + '" ..')
+		update_keywords()
 
 # def keyword(bot, update):
 #     reply_keyboard = [['Boy', 'Girl', 'Other']]
