@@ -35,7 +35,14 @@ Base = declarative_base()
 # end init db
 
 #define classes
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Table, ForeignKey
+from sqlalchemy.orm import relationship
+
+# keywords_messages_association_table = Table('keywords_messages_association', Base.metadata,
+#     Column('message_id', Integer, ForeignKey('messages.id')),
+#     Column('keyword_id', Integer, ForeignKey('keywords.id'))
+# )
+  
 
 class Message(Base):
 	__tablename__ = 'messages'
@@ -43,11 +50,24 @@ class Message(Base):
 	body = Column(String)
 	chat_id = Column(Integer)
 	message_id = Column(Integer)
+	keywords = relationship("KeywordsMessagesAssociation", back_populates="message")
+
+	# or use 	backref="messages" on one
 
 class Keyword(Base):
 	__tablename__ = 'keywords'
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
+	messages = relationship("KeywordsMessagesAssociation", back_populates="keyword")	
+
+class KeywordsMessagesAssociation(Base):
+    __tablename__ = 'keywords_messages_association'
+    message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
+    keyword_id = Column(Integer, ForeignKey('keywords.id'), primary_key=True)
+    count = Column(Integer)
+    keyword = relationship("Keyword", back_populates="messages")
+    message = relationship("Message", back_populates="keywords")  
+
 
 #create all tables /db
 Base.metadata.create_all(engine)
@@ -79,8 +99,10 @@ keywords = []
 
 def save_message(message):
 	# save to db\
-	session.add(Message(body=message.text, chat_id=message.chat.id, message_id=message.message_id))
+	message = Message(body=message.text, chat_id=message.chat.id, message_id=message.message_id)
+	session.add(message)
 	session.commit()
+	return message
 
 
 def update_keywords():
@@ -92,7 +114,7 @@ update_keywords()
 
 
 def detect_keywords(string):
-	
+	# todo: keyword e from kew class return kone
 	# normalizer = Normalizer()   
 	# msg = normalizer.normalize(string)
 	# found_keywords = ''
@@ -106,8 +128,11 @@ def detect_keywords(string):
 	# return list(set(aString) & set(keywords))
 	return found_keywords
 
-
-
+def get_command_query(string):
+	msg = string.split()
+	del msg[0]
+	key = ' '.join(msg).strip()
+	return key
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -122,13 +147,31 @@ def start(bot, update):
 
 def addKeyword(bot, update):
 	update.message.from_user.username
-	msg = update.message.text.split()
-	del msg[0]
-	key = ' '.join(msg)
-	if len(key) > 2:
+	key = get_command_query(update.message.text)
+	if key:
 		session.add(Keyword(name=key))
-		update.message.reply_text('keyword "' + key + '" ..')
+		update.message.reply_text('added keyword "' + key + '" ..')
 		update_keywords()
+
+def getAnswers(bot, update):
+	msg = get_command_query(update.message.text)
+	
+	# get message keywords
+	msg_keywords = detect_keywords(update.message.text)
+	
+	# search db for similar / relevant messages!!
+	answers = []
+	for keyw in msg_keywords:
+		#todo refactor detect keyword ke real keyword() bargardone
+		key = session.query(Keyword).filter_by(name=keyw).first()
+		assocs = session.query(KeywordsMessagesAssociation).filter_by(keyword_id=key.id).limit(5)
+		for assoc in assocs:
+			answers.append(assoc.message.body)
+	
+	# return most relevant answers
+	for answer in answers:
+		update.message.reply_text(answer)
+
 
 # def keyword(bot, update):
 #     reply_keyboard = [['Boy', 'Girl', 'Other']]
@@ -168,11 +211,23 @@ def base_logic(bot, update):
 	
 	if len(detected_keywords) > 0:
 		msg = ''
+		message = save_message(update.message)
 		for key, value in detected_keywords.iteritems():
 			msg += "#{0} {1}martabe ".format(key.replace (" ", "_"), value)
+			#todo redundant, pass bokon
+			keyw = session.query(Keyword).filter_by(name=key).first()
+			#create association
+			assoc = KeywordsMessagesAssociation(count=value)
+			assoc.message = message
+			assoc.keyword = keyw
+			session.add(assoc)		
+
 		bot.sendMessage(chat_id= test_group_chat_id, text= 'detected from chat: ' + update.message.chat.title)
 		bot.sendMessage(chat_id= test_group_chat_id, text= msg)
-		save_message(update.message)
+		session.commit()
+		# TODO use association proxy to do this better/easier
+		for association in message.keywords:
+			print association.keyword.name
 	
 # 	if 'soal' in update.message.text:
 		# update.message.reply_text('soal porside shod!')
@@ -188,6 +243,7 @@ def main():
     # on different commands - answer in Telegram
 	dp.add_handler(CommandHandler("start", start))
 	dp.add_handler(CommandHandler("addKeyword", addKeyword))
+	dp.add_handler(CommandHandler("getAnswers", getAnswers))
 #     dp.add_handler(CommandHandler("help", help))
 
  #    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
