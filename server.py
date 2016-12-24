@@ -12,7 +12,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #hazm
-# from hazm import *
+from hazm import *
 
 # felan send messages to the group
 test_group_chat_id = -195462829
@@ -113,19 +113,30 @@ def update_keywords():
 update_keywords()
 
 
+tagger = POSTagger(model='resources/postagger.model')
+stemmer = Stemmer()
+def learn_keywords(string):
+	tagged_msg = tagger.tag(word_tokenize(string))
+	for word in tagged_msg:
+		if word[1] == 'N':
+			keyw = stemmer.stem(word[0])
+			add_keyword(keyw)
+
+def add_keyword(key):
+	if len(key)>1 and not key in keywords:
+		session.add(Keyword(name=key))
+		update_keywords()
+		return True
+
+
 def detect_keywords(string):
 	# todo: keyword e from kew class return kone
-	# normalizer = Normalizer()   
-	# msg = normalizer.normalize(string)
 	# found_keywords = ''
 	found_keywords = {}
 	for key in keywords:
 		rep = string.count(key)
 		if rep > 0 :
-			# found_keywords += "#{0} ".format(key.replace (" ", "_"))
 			found_keywords[key]= rep
-	# aString = string.split()
-	# return list(set(aString) & set(keywords))
 	return found_keywords
 
 def get_command_query(string):
@@ -148,10 +159,9 @@ def start(bot, update):
 def addKeyword(bot, update):
 	update.message.from_user.username
 	key = get_command_query(update.message.text)
-	if key:
-		session.add(Keyword(name=key))
+	if add_new_keyword(key):
 		update.message.reply_text('added keyword "' + key + '" ..')
-		update_keywords()
+
 
 def getAnswers(bot, update):
 	msg = get_command_query(update.message.text)
@@ -206,6 +216,7 @@ def error(bot, update, error):
 	logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 def base_logic(bot, update):
+	learn_keywords(update.message.text)
 	detected_keywords = detect_keywords(update.message.text)
 	# msg_keywords = str(detected_keywords).strip('[]')
 	
@@ -226,8 +237,8 @@ def base_logic(bot, update):
 		bot.sendMessage(chat_id= test_group_chat_id, text= msg)
 		session.commit()
 		# TODO use association proxy to do this better/easier
-		for association in message.keywords:
-			print association.keyword.name
+		# for association in message.keywords:
+		# 	print association.keyword.name
 	
 # 	if 'soal' in update.message.text:
 		# update.message.reply_text('soal porside shod!')
