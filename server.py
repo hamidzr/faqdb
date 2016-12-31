@@ -116,11 +116,14 @@ update_keywords()
 tagger = POSTagger(model='resources/postagger.model')
 stemmer = Stemmer()
 def learn_keywords(string):
+	#relys on hazm detecting that it is a noun
 	tagged_msg = tagger.tag(word_tokenize(string))
 	for word in tagged_msg:
 		if word[1] == 'N':
 			keyw = stemmer.stem(word[0])
-			add_keyword(keyw)
+			#dont learn if it is persian and less than 4 characters. mishod 3 roham begirim. this is the lazy way
+			if len(keyw) > 3 :
+				add_keyword(keyw)
 
 def add_keyword(key):
 	if len(key)>1 and not key in keywords:
@@ -137,6 +140,14 @@ def detect_keywords(string):
 		rep = string.count(key)
 		if rep > 0 :
 			found_keywords[key]= rep
+
+	#TODO az 1 kalame 2 ta keyword detect nakone
+	# if key in found_keywords.keys()
+	# keywordo bardash az to text baresh dare
+	# import re
+	# string = 'che khabara salam <asdf> golabi'
+	# print re.sub('\s.+ala.+\s', ' * ', string)	
+
 	return found_keywords
 
 def get_command_query(string):
