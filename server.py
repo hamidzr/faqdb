@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,ConversationHandler)
 import logging
+import csv
 
 ## to make it utf-8
 import sys, sqlite3, os
@@ -193,6 +194,28 @@ def getAnswers(bot, update):
 	for answer in answers:
 		update.message.reply_text(answer)
 
+def topKeywords(bot, update):
+	# goal: return the most popular keywords
+	# for each keyword id that we have do
+	statistics = {}
+	for keyw in keywords:
+		keyRep = 0
+		key = session.query(Keyword).filter_by(name=keyw).first()
+		assocs = session.query(KeywordsMessagesAssociation).filter_by(keyword_id=key.id)
+		for assoc in assocs:
+			keyRep += assoc.count
+		statistics[key.name] = keyRep
+	os.remove('topKeywords.csv')
+	with open('topKeywords.csv', 'wb') as csvfile:
+		spamwriter = csv.writer(csvfile)
+		spamwriter.writerow(['keyword', 'count'])
+		for key,value in statistics.items():
+			spamwriter.writerow([key, value])
+	update.message.reply_text('report generated http://hamidzare.xyz/_dl/keywords.csv')
+	bot.sendDocument(chat_id= test_group_chat_id, document=open('topKeywords.csv', 'rb'))
+	# bot.sendPhoto(chat_id=test_group_chat_id, photo='https://telegram.org/img/t_logo.png')
+	# bot.sendMessage(chat_id=test_group_chat_id, text="I'm sorry Dave I'm afraid I can't do that.")
+	# update.message.reply_text('report generated')
 
 # def keyword(bot, update):
 #     reply_keyboard = [['Boy', 'Girl', 'Other']]
@@ -266,6 +289,7 @@ def main():
 	dp.add_handler(CommandHandler("start", start))
 	dp.add_handler(CommandHandler("addKeyword", addKeyword))
 	dp.add_handler(CommandHandler("getAnswers", getAnswers))
+	dp.add_handler(CommandHandler("topKeywords", topKeywords))
 #     dp.add_handler(CommandHandler("help", help))
 
  #    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
