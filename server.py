@@ -205,7 +205,6 @@ def topKeywords(bot, update):
 		for assoc in assocs:
 			keyRep += assoc.count
 		statistics[key.name] = keyRep
-	os.remove('topKeywords.csv')
 	with open('topKeywords.csv', 'wb') as csvfile:
 		spamwriter = csv.writer(csvfile)
 		spamwriter.writerow(['keyword', 'count'])
