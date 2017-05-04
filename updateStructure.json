@@ -1,0 +1,52 @@
+{  
+   'message':{  
+      'migrate_to_chat_id':0,
+      'delete_chat_photo':False,
+      'new_chat_photo':[  
+
+      ],
+      'entities':[  
+
+      ],
+      'text':u'fafa',
+      'migrate_from_chat_id':0,
+      'channel_chat_created':False,
+      'from':{  
+         'username':u'Hamidzr',
+         'first_name':u'Hamid',
+         'last_name':'',
+         'type':'',
+         'id':105509681
+      },
+      'supergroup_chat_created':False,
+      'chat':{  
+         'username':'',
+         'first_name':'',
+         'all_members_are_admins':False,
+         'title':u'bot test',
+         'last_name':'',
+         'type':u'group',
+         'id':-195462829
+      },
+      'photo':[  
+
+      ],
+      'date':1493878623,
+      'group_chat_created':False,
+      'caption':'',
+      'message_id':9266,
+      'new_chat_title':''
+   },
+   'update_id':935593905
+}
+
+
+
+
+
+
+
+
+
+
+
